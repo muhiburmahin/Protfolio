@@ -1,31 +1,68 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function Hero() {
-  const [textIndex, setTextIndex] = useState(0);
   const [mounted, setMounted] = useState(false);
-  const roles = ["Full Stack Developer", "Problem Solver"];
 
-  // Hydration fix & Typewriter interval
+  // ===== NAME TYPEWRITER (RUNS ONCE) =====
+  const fullName = "Md Muhibur Rahman Mahin";
+  const [typedName, setTypedName] = useState("");
+
+  // ===== ROLE TYPEWRITER (LOOP) =====
+  const roles = ["Full Stack Developer", "Problem Solver"];
+  const [displayText, setDisplayText] = useState("");
+  const [roleIndex, setRoleIndex] = useState(0);
+
+  // Name typing effect
   useEffect(() => {
     setMounted(true);
-    const interval = setInterval(() => {
-      setTextIndex((prev) => (prev + 1) % roles.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [roles.length]);
+
+    let i = 0;
+    const typing = setInterval(() => {
+      setTypedName(fullName.slice(0, i + 1));
+      i++;
+
+      if (i === fullName.length) {
+        clearInterval(typing);
+      }
+    }, 70);
+
+    return () => clearInterval(typing);
+  }, []);
+
+  // Role typing loop
+  useEffect(() => {
+    let charIndex = 0;
+    let currentText = roles[roleIndex];
+
+    const typing = setInterval(() => {
+      setDisplayText(currentText.slice(0, charIndex + 1));
+      charIndex++;
+
+      if (charIndex === currentText.length) {
+        clearInterval(typing);
+
+        setTimeout(() => {
+          setRoleIndex((prev) => (prev + 1) % roles.length);
+          setDisplayText("");
+        }, 1500);
+      }
+    }, 80);
+
+    return () => clearInterval(typing);
+  }, [roleIndex]);
 
   if (!mounted) return null;
 
   return (
     <section
       id="home"
-      className="min-h-screen flex items-center pt-32 pb-20 overflow-hidden relative transition-colors duration-500 bg-bg-primary"
+      className="min-h-screen flex items-center pt-32 pb-20 overflow-hidden relative bg-bg-primary"
     >
-      {/* Background Animation: Mode Sensitive Floating Particles */}
+      {/* ===== BACKGROUND PARTICLES ===== */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         {[...Array(15)].map((_, i) => (
           <motion.div
@@ -41,12 +78,11 @@ export default function Hero() {
               x: [0, Math.random() * 60 - 30, 0],
               y: [0, Math.random() * 60 - 30, 0],
               scale: [1, 1.1, 1],
-              opacity: [0.3, 0.6, 0.3]
+              opacity: [0.3, 0.6, 0.3],
             }}
             transition={{
               duration: 8 + Math.random() * 7,
               repeat: Infinity,
-              ease: "easeInOut",
             }}
           />
         ))}
@@ -55,7 +91,7 @@ export default function Hero() {
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <div className="grid md:grid-cols-2 gap-12 items-center">
 
-          {/* Left Content */}
+          {/* ===== LEFT SIDE ===== */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -63,58 +99,61 @@ export default function Hero() {
             className="space-y-8"
           >
             <div className="space-y-4 text-center md:text-left">
-              <motion.p className="text-brand font-bold flex items-center justify-center md:justify-start gap-3 text-sm tracking-[0.3em] uppercase">
-                <span className="w-10 h-[2px] bg-brand inline-block"></span>
-                Welcome to my world
-              </motion.p>
 
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-tight text-heading">
+              <p className="text-brand font-bold flex items-center justify-center md:justify-start gap-3 text-sm tracking-[0.3em] uppercase">
+                <span className="w-10 h-[2px] bg-brand"></span>
+                Welcome to my world
+              </p>
+
+              {/* ===== NAME (NO CUT + TYPEWRITER) ===== */}
+              <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.2] pb-2 text-heading break-words overflow-visible">
                 Hey, I&apos;m <br />
-                <span className="bg-gradient-to-r from-brand via-brand-light to-accent bg-clip-text text-transparent animate-gradient-x italic font-heading">
-                  Md Muhibur Rahman Mahin
+                <span className="inline-block bg-gradient-to-r from-brand via-brand-light to-accent bg-clip-text text-transparent italic font-heading">
+                  {typedName}
+                  <span className="animate-pulse">|</span>
                 </span>
               </h1>
 
+              {/* ===== ROLE TYPEWRITER ===== */}
               <div className="h-20 flex items-center justify-center md:justify-start">
-                <AnimatePresence mode="wait">
-                  <motion.p
-                    key={textIndex}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="text-2xl md:text-4xl font-bold text-text-secondary"
-                  >
-                    I am a <span className="text-accent underline decoration-brand/30 underline-offset-8">{roles[textIndex]}</span>
-                  </motion.p>
-                </AnimatePresence>
+                <p className="text-2xl md:text-4xl font-bold text-text-secondary">
+                  I am a{" "}
+                  <span className="text-accent underline decoration-brand/30 underline-offset-8">
+                    {displayText}
+                    <span className="animate-pulse">|</span>
+                  </span>
+                </p>
               </div>
 
+              {/* ===== DESCRIPTION UPDATED ===== */}
               <p className="text-text-secondary text-lg leading-relaxed max-w-lg italic border-l-4 border-brand pl-4 mx-auto md:mx-0">
-                &quot;Crafting modern, responsive, and user-friendly web experiences with
-                <span className="text-heading font-medium"> MERN Stack</span> and
-                <span className="text-heading font-medium"> Next.js</span>. Transforming complex problems into elegant solutions.&quot;
+                "Crafting modern, responsive, and user-friendly web experiences as a
+                <span className="text-heading font-medium">
+                  {" "}Full Stack Modern Website Developer
+                </span>.
+                Transforming complex problems into elegant solutions."
               </p>
             </div>
 
+            {/* ===== BUTTON + SOCIAL ===== */}
             <div className="flex flex-col sm:flex-row items-center gap-6 pt-4 justify-center md:justify-start">
               <Link href="#contact" className="btn-primary group">
                 <i className="fas fa-paper-plane group-hover:rotate-12 transition-transform"></i>
                 Say Hello
               </Link>
 
-              {/* Social Icons */}
               <div className="flex gap-5">
                 {[
-                  { icon: "fab fa-github", url: "https://github.com/muhiburmahin", hover: "hover:text-heading" },
-                  { icon: "fab fa-linkedin", url: "https://www.linkedin.com/in/muhiburmahin", hover: "hover:text-blue-600" },
-                  { icon: "fab fa-facebook", url: "https://www.facebook.com/profile.php?id=61583224643452", hover: "hover:text-blue-500" },
+                  { icon: "fab fa-github", url: "https://github.com/muhiburmahin" },
+                  { icon: "fab fa-linkedin", url: "https://www.linkedin.com/in/muhiburmahin" },
+                  { icon: "fab fa-facebook", url: "https://www.facebook.com/profile.php?id=61583224643452" },
                 ].map((social, i) => (
                   <a
                     key={i}
                     href={social.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`text-2xl text-text-secondary transition-all duration-300 hover:-translate-y-2 ${social.hover}`}
+                    className="text-2xl text-text-secondary hover:text-accent transition-all duration-300 hover:-translate-y-2"
                   >
                     <i className={social.icon}></i>
                   </a>
@@ -123,7 +162,8 @@ export default function Hero() {
             </div>
           </motion.div>
 
-          {/* Right Image Content */}
+          {/* ===== RIGHT SIDE IMAGE ===== */}
+          {/* ===== RIGHT SIDE IMAGE ===== */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -131,54 +171,55 @@ export default function Hero() {
             className="flex justify-center items-center relative"
           >
             <div className="relative group">
-              {/* Rings Animated with CSS Variables */}
+
+              {/* Animated Rings */}
               <div className="absolute inset-0 border-2 border-brand/20 rounded-full animate-[ping_3s_linear_infinite] scale-110"></div>
               <div className="absolute inset-0 border-2 border-accent/10 rounded-full animate-[ping_5s_linear_infinite] scale-125"></div>
 
-              {/* Glow Behind Image */}
-              <div className="absolute -inset-4 bg-gradient-to-r from-brand to-accent rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity duration-700"></div>
+              {/* Glow */}
+              <div className="absolute -inset-4 bg-gradient-to-r from-brand to-accent rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition duration-700"></div>
 
+              {/* IMAGE */}
               <motion.div
                 animate={{ y: [0, -15, 0] }}
-                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                transition={{ duration: 6, repeat: Infinity }}
                 className="relative w-72 h-72 md:w-96 md:h-96 rounded-full overflow-hidden border-[10px] border-bg-secondary shadow-2xl z-10"
               >
                 <img
                   src="/hiro.jpg"
-                  alt="Md Muhib Ur Rahman Mahin"
-                  className="w-full h-full object-cover grayscale-[15%] hover:grayscale-0 transition-all duration-700"
+                  alt="Mahin"
+                  className="w-full h-full object-cover grayscale-[15%] hover:grayscale-0 transition duration-700"
                 />
               </motion.div>
 
-              {/* Stats Badge 1 */}
-              <motion.div
-                initial={{ x: 20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="absolute top-10 -right-4 md:-right-8 bg-bg-secondary/90 backdrop-blur-md p-4 rounded-2xl border border-border shadow-xl z-20"
-              >
-                <div className="text-brand text-2xl font-black">1+</div>
-                <div className="text-[10px] text-text-secondary uppercase tracking-tighter font-bold">Years of Exp.</div>
-              </motion.div>
+              {/* ✅ BADGE ON RIGHT SIDE */}
+              <div className="absolute top-10 -right-6 md:-right-10 bg-bg-secondary/90 backdrop-blur-md px-5 py-3 rounded-2xl border border-border shadow-xl z-20">
+                <div className="text-brand text-xl font-black">1+</div>
+                <div className="text-[10px] uppercase tracking-wide text-text-secondary">
+                  Years Experience
+                </div>
+              </div>
 
-              {/* Stats Badge 2 */}
-              <motion.div
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.7 }}
-                className="absolute bottom-10 -left-4 md:-left-8 bg-bg-secondary/90 backdrop-blur-md p-4 rounded-2xl border border-border shadow-xl z-20"
-              >
-                <div className="text-accent text-2xl font-black">5+</div>
-                <div className="text-[10px] text-text-secondary uppercase tracking-tighter font-bold">Global Clients</div>
-              </motion.div>
             </div>
           </motion.div>
         </div>
       </div>
+
+      {/* ===== SCROLL DOWN ===== */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20">
+        <a
+          href="#about"
+          className="flex flex-col items-center text-text-secondary hover:text-accent transition"
+        >
+          <span className="text-sm mb-1">Scroll Down</span>
+          <div className="w-6 h-10 border-2 border-text-secondary rounded-full flex justify-center items-start p-1">
+            <div className="w-1 h-2 bg-text-secondary rounded-full animate-bounce"></div>
+          </div>
+        </a>
+      </div>
     </section>
   );
 }
-
 
 // "use client";
 

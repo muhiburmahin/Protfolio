@@ -80,10 +80,10 @@ export default function Navbar() {
             <ul className="flex items-center gap-2 relative">
               {navItems.map((item) => {
                 const isActive = activeSection === item.id;
-                
+
                 return (
-                  <li 
-                    key={item.name} 
+                  <li
+                    key={item.name}
                     className="relative z-10 px-4 py-2"
                     onMouseEnter={() => setHoveredPath(item.href)}
                     onMouseLeave={() => setHoveredPath(null)}
@@ -91,14 +91,13 @@ export default function Navbar() {
                     <a
                       href={item.href}
                       onClick={(e) => handleNavClick(e, item.href)}
-                      className={`relative z-10 flex items-center gap-2 font-medium text-sm transition-colors duration-300 ${
-                        isActive ? "text-brand" : "text-text-primary hover:text-heading"
-                      }`}
+                      className={`relative z-10 flex items-center gap-2 font-medium text-sm transition-colors duration-300 ${isActive ? "text-brand" : "text-text-primary hover:text-heading"
+                        }`}
                     >
                       <i className={`${item.icon} ${isActive ? "text-brand" : "text-text-secondary"}`}></i>
                       {item.name}
                     </a>
-                    
+
                     {/* Hover indicator */}
                     {hoveredPath === item.href && (
                       <motion.div
@@ -110,7 +109,7 @@ export default function Navbar() {
                         transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                       />
                     )}
-                    
+
                     {/* Active indicator */}
                     {isActive && (
                       <motion.div
@@ -122,9 +121,9 @@ export default function Navbar() {
                   </li>
                 );
               })}
-              
+
               {/* More Dropdown */}
-              <li 
+              <li
                 className="relative z-10 px-4 py-2 cursor-pointer"
                 onMouseEnter={() => setIsMoreHovered(true)}
                 onMouseLeave={() => setIsMoreHovered(false)}
@@ -147,7 +146,7 @@ export default function Navbar() {
                       <div className="bg-bg-secondary/95 backdrop-blur-xl border border-border rounded-2xl shadow-2xl p-2 w-56 relative overflow-hidden">
                         {/* Subtle glow inside dropdown */}
                         <div className="absolute top-0 right-0 w-32 h-32 bg-brand/10 blur-3xl rounded-full"></div>
-                        
+
                         {moreItems.map((item) => {
                           const isActive = activeSection === item.id;
                           return (
@@ -158,16 +157,14 @@ export default function Navbar() {
                                 handleNavClick(e, item.href);
                                 setIsMoreHovered(false);
                               }}
-                              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 relative group overflow-hidden ${
-                                isActive ? "bg-brand/10 text-brand" : "hover:bg-bg-primary text-text-primary"
-                              }`}
+                              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 relative group overflow-hidden ${isActive ? "bg-brand/10 text-brand" : "hover:bg-bg-primary text-text-primary"
+                                }`}
                             >
                               {/* Hover sweep effect */}
                               <span className="absolute inset-0 bg-gradient-to-r from-brand/0 via-brand/5 to-brand/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out"></span>
-                              
-                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
-                                isActive ? "bg-brand/20" : "bg-bg-primary group-hover:bg-brand/10"
-                              }`}>
+
+                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isActive ? "bg-brand/20" : "bg-bg-primary group-hover:bg-brand/10"
+                                }`}>
                                 <i className={`${item.icon} ${isActive ? "text-brand" : "text-text-secondary group-hover:text-brand"}`}></i>
                               </div>
                               <span className="font-medium text-sm relative z-10">{item.name}</span>
@@ -212,7 +209,7 @@ export default function Navbar() {
           <a href="#home" onClick={(e) => handleNavClick(e, "#home")} className="flex items-center gap-2">
             <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
           </a>
-          
+
           <div className="flex items-center gap-4">
             {mounted && (
               <button
@@ -226,16 +223,16 @@ export default function Navbar() {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="w-10 h-10 flex flex-col justify-center items-center gap-1.5 bg-brand/10 rounded-lg text-brand"
             >
-              <motion.span 
-                animate={isMobileMenuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }} 
+              <motion.span
+                animate={isMobileMenuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
                 className="w-5 h-0.5 bg-current block transition-all"
               />
-              <motion.span 
-                animate={isMobileMenuOpen ? { opacity: 0 } : { opacity: 1 }} 
+              <motion.span
+                animate={isMobileMenuOpen ? { opacity: 0 } : { opacity: 1 }}
                 className="w-5 h-0.5 bg-current block transition-all"
               />
-              <motion.span 
-                animate={isMobileMenuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }} 
+              <motion.span
+                animate={isMobileMenuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
                 className="w-5 h-0.5 bg-current block transition-all"
               />
             </button>
@@ -265,9 +262,8 @@ export default function Navbar() {
                       <a
                         href={item.href}
                         onClick={(e) => handleNavClick(e, item.href)}
-                        className={`flex items-center gap-4 p-4 rounded-2xl transition-colors ${
-                          isActive ? "bg-brand/10 border border-brand/20" : "hover:bg-bg-primary border border-transparent"
-                        }`}
+                        className={`flex items-center gap-4 p-4 rounded-2xl transition-colors ${isActive ? "bg-brand/10 border border-brand/20" : "hover:bg-bg-primary border border-transparent"
+                          }`}
                       >
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isActive ? "bg-brand text-white shadow-lg shadow-brand/30" : "bg-bg-secondary border border-border text-text-secondary"}`}>
                           <i className={`${item.icon}`}></i>
