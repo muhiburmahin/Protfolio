@@ -27,7 +27,7 @@ const educationData = [
   },
   {
     degree: "Higher Secondary Certificate (HSC)",
-    institution: "Your College Name",
+    institution: "Sylhet Science & Technology College",
     period: "2022 - 2023",
     status: "Completed",
     description: "Successfully completed higher secondary education with a major in Science with a focus on Physics and Mathematics.",
@@ -37,7 +37,7 @@ const educationData = [
   },
   {
     degree: "Secondary School Certificate (SSC)",
-    institution: "Your School Name",
+    institution: "Thana Sadar High School,Companiganj,Sylhet",
     period: "2019 - 2021",
     status: "Completed",
     description: "Foundation in science and mathematics, achieving excellence in academic results and participating in science fairs.",
