@@ -1,171 +1,125 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { skillCategories } from "@/data/skills";
+import { getProficiencyStyles, getSkillBarWidth } from "@/lib/skills";
+import { Icon } from "@/components/ui/icon";
 
-const skillsData = [
-  {
-    title: "Frontend Development",
-    icon: "fas fa-laptop-code",
-    color: "text-brand",
-    skills: [
-      { name: "Next.js", icon: "fab fa-react text-blue-500", level: "Expert", percent: 95 },
-      { name: "React.js", icon: "fab fa-react text-blue-400", level: "Expert", percent: 95 },
-      { name: "Tailwind CSS", icon: "fas fa-palette text-cyan-400", level: "Expert", percent: 92 },
-      { name: "TypeScript", icon: "fas fa-code text-blue-500", level: "Intermediate", percent: 80 },
-      { name: "Framer Motion / GSAP", icon: "fas fa-running text-pink-500", level: "Expert", percent: 88 },
-    ]
-  },
-  {
-    title: "Backend & Database",
-    icon: "fas fa-server",
-    color: "text-accent",
-    skills: [
-      { name: "Node.js / Express", icon: "fab fa-node text-green-400", level: "Expert", percent: 88 },
-      { name: "PostgreSQL / Prisma", icon: "fas fa-database text-blue-400", level: "Intermediate", percent: 85 },
-      { name: "MongoDB / Mongoose", icon: "fas fa-leaf text-green-600", level: "Expert", percent: 90 },
-      { name: "Firebase / NextAuth", icon: "fas fa-shield-alt text-yellow-500", level: "Expert", percent: 87 },
-      { name: "REST / GraphQL", icon: "fas fa-plug text-orange-400", level: "Expert", percent: 92 },
-    ]
-  },
-  {
-    title: "Core Programming",
-    icon: "fas fa-brain",
-    color: "text-purple-500",
-    skills: [
-      { name: "C++ (Competitive)", icon: "fas fa-terminal text-indigo-400", level: "Expert", percent: 90 },
-      { name: "Data Structures", icon: "fas fa-sitemap text-brand", level: "Expert", percent: 88 },
-      { name: "Algorithms", icon: "fas fa-code-branch text-accent", level: "Expert", percent: 85 },
-      { name: "System Design", icon: "fas fa-project-diagram text-blue-500", level: "Intermediate", percent: 70 },
-      { name: "Git & Docker", icon: "fab fa-git-alt text-orange-500", level: "Expert", percent: 95 },
-    ]
-  }
-];
 export default function Skills() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
+  const prefersReducedMotion = useReducedMotion();
 
   return (
-    <section id="skills" className="py-24 relative overflow-hidden transition-colors duration-500">
-
-      {/* Background Animation using CSS variables for colors */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <motion.div
-          animate={{
-            scale: [1, 1.1, 1],
-            rotate: [0, 5, 0],
-            opacity: [0.3, 0.5, 0.3]
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand/5 blur-[120px] rounded-full"
-        />
-        <motion.div
-          animate={{
-            scale: [1.1, 1, 1.1],
-            x: [0, -30, 0],
-            opacity: [0.2, 0.4, 0.2]
-          }}
-          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent/5 blur-[120px] rounded-full"
-        />
+    <section
+      id="skills"
+      className="relative overflow-hidden py-16 transition-colors duration-500 sm:py-20 md:py-24"
+    >
+      {/* background */}
+      <div className="pointer-events-none absolute inset-0 z-0">
+        <div className="absolute right-0 top-0 h-[min(60vw,30rem)] w-[min(60vw,30rem)] rounded-full bg-brand/5 blur-3xl" />
+        <div className="absolute bottom-0 left-0 h-[min(50vw,24rem)] w-[min(50vw,24rem)] rounded-full bg-accent/5 blur-3xl" />
       </div>
 
-      <div className="container mx-auto px-4 lg:px-8 relative z-10">
-
-        {/* Section Header */}
-        <div className="text-center mb-16 space-y-4">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="inline-block px-4 py-1.5 rounded-full bg-brand/10 border border-border text-brand text-xs font-bold uppercase tracking-widest"
-          >
+      <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8">
+        {/* header */}
+        <motion.div
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.55 }}
+          className="mb-12 space-y-4 text-center sm:mb-16"
+        >
+          <div className="inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-brand">
+            <Icon name="sparkles" size={14} />
             My Expertise
-          </motion.div>
+          </div>
 
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="section-title text-center"
-          >
-            Professional Skills
-          </motion.h2>
+          <h2 className="section-title text-center">Professional Skills</h2>
 
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-text-secondary font-medium"
-          >
-            Building high-performance applications with <span className="text-brand font-bold">1+ year</span> of experience.
-          </motion.p>
-        </div>
+          <p className="mx-auto max-w-xl text-sm font-medium text-text-secondary sm:text-base">
+            Proficiency reflects real project usage —{" "}
+            <span className="font-semibold text-brand">Production</span>,{" "}
+            <span className="font-semibold text-accent">Comfortable</span>, or{" "}
+            <span className="font-semibold text-text-secondary">Learning</span>.
+          </p>
 
-        {/* Skills Cards Grid */}
-        <div className="grid md:grid-cols-3 gap-8">
-          {skillsData.map((category, idx) => (
+          <div className="flex flex-wrap justify-center gap-2 pt-1 text-[10px] font-bold uppercase sm:gap-3">
+            {(["Production", "Comfortable", "Learning"] as const).map((level) => {
+              const styles = getProficiencyStyles(level);
+              return (
+                <span key={level} className={`rounded-full border px-3 py-1 sm:px-4 ${styles.badge}`}>
+                  {level}
+                </span>
+              );
+            })}
+          </div>
+        </motion.div>
+
+        {/* cards */}
+        <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {skillCategories.map((category, idx) => (
             <motion.div
               key={category.title}
-              initial={{ opacity: 0, y: 30 }}
+              initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
+              viewport={{ once: true, margin: "-30px" }}
+              transition={{ delay: idx * 0.1, duration: 0.5 }}
               className="card-hover group"
             >
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-bg-primary border border-border group-hover:scale-110 transition-transform duration-300">
-                  <i className={`${category.icon} text-xl ${category.color}`}></i>
+              <div className="mb-6 flex items-center gap-3 sm:gap-4">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border bg-bg-primary transition-transform duration-300 group-hover:scale-110 sm:h-12 sm:w-12">
+                  <Icon name={category.icon} className={category.color} size={20} />
                 </div>
-                <h3 className="text-xl font-bold text-heading">
-                  {category.title}
-                </h3>
+                <h3 className="text-base font-bold text-heading sm:text-lg md:text-xl">{category.title}</h3>
               </div>
 
-              <div className="space-y-6">
-                {category.skills.map((skill) => (
-                  <div key={skill.name} className="relative">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-text-primary font-semibold flex items-center gap-2.5 text-sm">
-                        <i className={`${skill.icon} w-5 text-center transition-transform group-hover:scale-110`}></i>
-                        {skill.name}
-                      </span>
-                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border border-border/50 bg-bg-primary text-text-secondary`}>
-                        {skill.level}
-                      </span>
-                    </div>
+              <div className="space-y-5">
+                {category.skills.map((skill) => {
+                  const styles = getProficiencyStyles(skill.proficiency);
+                  const barWidth = getSkillBarWidth(skill.proficiency);
 
-                    {/* Standard Progress Bar */}
-                    <div className="h-2 bg-border/20 rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        whileInView={{ width: `${skill.percent}%` }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 1.5, ease: "circOut" }}
-                        className="h-full bg-gradient-to-r from-brand to-accent rounded-full"
-                      />
+                  return (
+                    <div key={skill.name} className="relative">
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="flex items-center gap-2 text-xs font-semibold text-text-primary sm:text-sm">
+                          <Icon
+                            name={skill.icon}
+                            className={`${skill.iconClassName} transition-transform group-hover:scale-110`}
+                            size={16}
+                          />
+                          {skill.name}
+                        </span>
+                        <span className={`rounded border px-2 py-0.5 text-[10px] font-bold uppercase ${styles.badge}`}>
+                          {skill.proficiency}
+                        </span>
+                      </div>
+
+                      <div className="h-1.5 overflow-hidden rounded-full bg-border/20 sm:h-2">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          whileInView={{ width: `${barWidth}%` }}
+                          viewport={{ once: true }}
+                          transition={prefersReducedMotion ? { duration: 0 } : { duration: 1.2, ease: "circOut" }}
+                          className={`h-full rounded-full bg-gradient-to-r ${styles.bar}`}
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* CTA Button */}
+        {/* CTA */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-16 text-center"
+          transition={{ duration: 0.5 }}
+          className="mt-12 text-center sm:mt-16"
         >
-          <a href="#contact" className="btn-primary">
-            <i className="fas fa-envelope"></i>
+          <a href="#contact" className="btn-primary inline-flex">
+            <Icon name="mail" size={18} />
             Hire Me Now
           </a>
         </motion.div>

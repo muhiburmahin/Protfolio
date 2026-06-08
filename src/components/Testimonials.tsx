@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { JSX } from "react";
 
 // --- Types ---
 interface Testimonial {

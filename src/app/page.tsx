@@ -5,9 +5,9 @@ import Hero from "@/components/Hero";
 import About from "@/components/About";
 import Technologies from "@/components/Technologies";
 import Skills from "@/components/Skills";
+import WorkExperience from "@/components/WorkExperience";
 import Education from "@/components/Education";
 import Projects from "@/components/Projects";
-import Testimonials from "@/components/Testimonials";
 import Contact from "@/components/Contact";
 import Footer from "@/components/layout/Footer";
 import Navbar from "@/components/layout/Navbar";
@@ -15,6 +15,9 @@ import Lenis from "lenis";
 
 export default function Home() {
   useEffect(() => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
+
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -43,9 +46,9 @@ export default function Home() {
       <About />
       <Technologies />
       <Skills />
+      <WorkExperience />
       <Education />
       <Projects />
-      <Testimonials />
       <Contact />
       <Footer />
     </main>

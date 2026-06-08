@@ -1,36 +1,115 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Portfolio — Md Muhibur Rahman Mahin
 
-## Getting Started
+Full-stack developer portfolio built with **Next.js 16**, **React 19**, **Tailwind CSS v4**, and a **Resend**-powered contact API. Includes project case studies, SEO (sitemap, robots, JSON-LD), and CI quality checks.
 
-First, run the development server:
+## Prerequisites
+
+- **Node.js** 20 LTS (recommended)
+- **npm** 10+
+- [Resend](https://resend.com) account (for contact form email in production)
+
+## Getting started
+
+```bash
+git clone <your-repo-url>
+cd portfolio
+npm ci
+cp .env.example .env.local
+```
+
+Edit `.env.local` (see [Environment variables](#environment-variables)), then:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy `.env.example` to `.env.local` and set:
 
-## Learn More
+| Variable | Description |
+|----------|-------------|
+| `RESEND_API_KEY` | API key from [Resend dashboard](https://resend.com/api-keys) |
+| `CONTACT_TO_EMAIL` | Inbox that receives contact form messages |
+| `CONTACT_FROM_EMAIL` | Verified sender in Resend (`onboarding@resend.dev` for testing) |
+| `NEXT_PUBLIC_SITE_URL` | Public site URL (SEO, sitemap, Open Graph). Use `http://localhost:3000` locally |
 
-To learn more about Next.js, take a look at the following resources:
+Without `RESEND_API_KEY`, the contact API returns **503** — the form UI still works, but emails are not sent.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start dev server |
+| `npm run build` | Production build |
+| `npm run start` | Run production server (after build) |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | TypeScript check (`tsc --noEmit`) |
+| `npm run test:e2e` | Playwright E2E tests |
+| `npm run test:e2e:ui` | Playwright UI mode (local debugging) |
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Push the repo to GitHub.
+2. Import the project in [Vercel](https://vercel.com/new).
+3. Framework preset: **Next.js** (auto-detected).
+4. Add environment variables from `.env.example` in **Project → Settings → Environment Variables**.
+5. Set `NEXT_PUBLIC_SITE_URL` to your production domain (e.g. `https://yourdomain.com`).
+6. Deploy. Vercel runs `npm run build` by default.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+After deploy, verify:
+
+- `/` — home and sections
+- `/projects/medistore` — case study pages
+- `/api/contact` — submit the contact form once
+- `/sitemap.xml` and `/robots.txt`
+
+## CI (GitHub Actions)
+
+Workflow: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+
+On push/PR to `main` or `master`:
+
+1. **quality** — `lint` → `typecheck` → `build`
+2. **e2e** — Playwright (navigation + contact form with mocked API)
+
+## E2E tests (Playwright)
+
+Tests live in `e2e/`. Contact tests **mock** `/api/contact` so CI does not need Resend credentials.
+
+```bash
+npm run build
+npm run test:e2e
+```
+
+First run locally may prompt to install browsers:
+
+```bash
+npx playwright install chromium
+```
+
+## Project structure (high level)
+
+```
+src/
+  app/              # App Router pages & API routes
+  components/       # UI sections (Hero, Projects, Contact, …)
+  data/             # Portfolio content (projects, skills, …)
+  lib/              # Utilities, validations, site config
+e2e/                # Playwright specs
+```
+
+Content edits: update files under `src/data/` (no CMS yet).
+
+## Roadmap (optional, later)
+
+- **CMS (Sanity)** — if you need frequent content edits without code deploys
+- **i18n** — Bengali / English
+- **Calendly** — “Book a call” CTA
+- **Admin panel** — only if content changes are very frequent
+
+## License
+
+Private portfolio project — all rights reserved unless you add a license file.

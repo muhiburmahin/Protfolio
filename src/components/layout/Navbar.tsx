@@ -2,172 +2,305 @@
 
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
-import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { Icon, type IconName } from "@/components/ui/icon";
+import { useMounted } from "@/lib/hooks/use-mounted";
+import { useNavbarScroll } from "@/lib/hooks/use-navbar-scroll";
+import { cn } from "@/lib/utils";
 
-const navItems = [
-  { name: "Home", href: "#home", id: "home", icon: "fas fa-home" },
-  { name: "About", href: "#about", id: "about", icon: "fas fa-user" },
-  { name: "Skills", href: "#skills", id: "skills", icon: "fas fa-star" },
-  { name: "Projects", href: "#projects", id: "projects", icon: "fas fa-briefcase" },
+type NavLink = {
+  label: string;
+  href: string;
+  id: string;
+  icon: IconName;
+};
+
+const MAIN_LINKS: NavLink[] = [
+  { label: "Home", href: "#home", id: "home", icon: "home" },
+  { label: "About", href: "#about", id: "about", icon: "user" },
+  { label: "Skills", href: "#skills", id: "skills", icon: "star" },
+  { label: "Projects", href: "#projects", id: "projects", icon: "rocket" },
 ];
 
-const moreItems = [
-  { name: "Technologies", href: "#technologies", id: "technologies", icon: "fas fa-microchip" },
-  { name: "Education", href: "#education", id: "education", icon: "fas fa-graduation-cap" },
-  { name: "Reviews", href: "#testimonials", id: "testimonials", icon: "fas fa-comments" },
-  { name: "Contact", href: "#contact", id: "contact", icon: "fas fa-envelope" },
+const MORE_LINKS: NavLink[] = [
+  { label: "Technologies", href: "#technologies", id: "technologies", icon: "microchip" },
+  { label: "Experience", href: "#experience", id: "experience", icon: "briefcase" },
+  { label: "Education", href: "#education", id: "education", icon: "graduationCap" },
+  { label: "Contact", href: "#contact", id: "contact", icon: "mail" },
 ];
+
+const ALL_LINKS = [...MAIN_LINKS, ...MORE_LINKS];
+const SCROLL_OFFSET = 72;
 
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMoreHovered, setIsMoreHovered] = useState(false);
-  const [activeSection, setActiveSection] = useState("home");
-  const [hoveredPath, setHoveredPath] = useState<string | null>(null);
+  const mounted = useMounted();
+  const { isScrolled } = useNavbarScroll(12);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [moreHover, setMoreHover] = useState(false);
+  const [activeId, setActiveId] = useState("home");
 
   useEffect(() => {
-    setMounted(true);
+    const onScroll = () => {
+      const position = window.scrollY + SCROLL_OFFSET;
+      let current = "home";
 
-    const handleScroll = () => {
-      // Scroll Spy Logic
-      const sections = [...navItems, ...moreItems].map(item => document.getElementById(item.id));
-      const scrollPosition = window.scrollY + 200;
-
-      for (const section of sections) {
-        if (section) {
-          const sectionTop = section.offsetTop;
-          const sectionHeight = section.offsetHeight;
-          if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-            setActiveSection(section.id);
-            break;
-          }
-        }
+      for (const link of ALL_LINKS) {
+        const el = document.getElementById(link.id);
+        if (el && position >= el.offsetTop) current = link.id;
       }
+
+      setActiveId(current);
     };
 
-    window.addEventListener("scroll", handleScroll);
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault();
-    setIsMobileMenuOpen(false);
-    const targetId = href.replace("#", "");
-    const elem = document.getElementById(targetId);
-    if (elem) {
-      window.scrollTo({
-        top: elem.offsetTop - 80,
-        behavior: "smooth"
-      });
-    }
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
+
+  const closeMenus = () => {
+    setMenuOpen(false);
+    setMoreHover(false);
   };
+
+  const scrollTo = (href: string) => {
+    closeMenus();
+    const el = document.getElementById(href.replace("#", ""));
+    if (!el) return;
+    window.scrollTo({ top: el.offsetTop - SCROLL_OFFSET + 4, behavior: "smooth" });
+  };
+
+  const onNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    scrollTo(href);
+  };
+
+  const isMoreActive = MORE_LINKS.some((l) => l.id === activeId);
+
+  const linkClasses = (isActive: boolean, scrolled: boolean) =>
+    cn(
+      "relative z-10 flex items-center gap-2 text-sm font-semibold transition-colors duration-200",
+      scrolled
+        ? isActive
+          ? "text-white"
+          : "text-white/80 hover:text-white"
+        : isActive
+          ? "text-brand"
+          : "text-text-secondary hover:text-heading"
+    );
+
+  const iconClasses = (isActive: boolean, scrolled: boolean) =>
+    cn(
+      "shrink-0 transition-colors duration-200",
+      scrolled
+        ? isActive
+          ? "text-white"
+          : "text-white/70"
+        : isActive
+          ? "text-brand"
+          : "text-text-secondary"
+    );
+
+  const renderDesktopLink = (link: NavLink) => {
+    const isActive = activeId === link.id;
+    return (
+      <a
+        key={link.id}
+        href={link.href}
+        onClick={(e) => onNavClick(e, link.href)}
+        className="relative rounded-full px-3 py-1.5"
+      >
+        <span className={linkClasses(isActive, isScrolled)}>
+          <Icon name={link.icon} size={15} className={iconClasses(isActive, isScrolled)} />
+          {link.label}
+        </span>
+        {isActive && (
+          <motion.span
+            layoutId="active-nav-pill"
+            className={cn(
+              "absolute inset-0 rounded-full",
+              isScrolled ? "bg-white/20" : "bg-brand/12 dark:bg-brand/20"
+            )}
+            transition={{ type: "spring", stiffness: 400, damping: 34 }}
+          />
+        )}
+      </a>
+    );
+  };
+
+  const renderMobileLink = (link: NavLink) => {
+    const isActive = activeId === link.id;
+    return (
+      <a
+        key={link.id}
+        href={link.href}
+        onClick={(e) => onNavClick(e, link.href)}
+        className={cn(
+          "flex items-center gap-3 rounded-xl px-3 py-3 text-[15px] font-semibold transition-colors active:scale-[0.98]",
+          isScrolled
+            ? isActive
+              ? "bg-white/20 text-white"
+              : "text-white/90 hover:bg-white/10"
+            : isActive
+              ? "bg-brand/10 text-brand"
+              : "text-heading hover:bg-bg-primary"
+        )}
+      >
+        <span
+          className={cn(
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+            isScrolled
+              ? isActive
+                ? "bg-white/25 text-white"
+                : "bg-white/10 text-white/80"
+              : isActive
+                ? "bg-brand/15 text-brand"
+                : "bg-bg-primary text-text-secondary"
+          )}
+        >
+          <Icon name={link.icon} size={18} />
+        </span>
+        {link.label}
+      </a>
+    );
+  };
+
+  if (!mounted) return null;
 
   return (
     <>
-      {/* Desktop Navbar - Floating Pill Design */}
-      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-5xl hidden lg:block">
-        <div className="bg-bg-secondary/70 backdrop-blur-xl border border-border rounded-full px-6 py-3 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(168,85,247,0.1)] transition-all duration-300">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <a href="#home" onClick={(e) => handleNavClick(e, "#home")} className="flex items-center gap-3 group">
-              <img src="/logo.png" alt="Logo" className="w-9 h-9 object-contain group-hover:scale-110 transition-transform duration-300" />
+      <header
+        className={cn(
+          "fixed inset-x-0 top-0 z-50 w-full pt-[env(safe-area-inset-top,0px)] transition-[padding] duration-300",
+          isScrolled ? "p-0" : "px-2 sm:px-3 lg:px-0 lg:pt-[env(safe-area-inset-top,0px)]"
+        )}
+      >
+        <motion.div
+          layout
+          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          className={cn(
+            "relative mx-auto w-full border backdrop-blur-xl transition-colors duration-300",
+            isScrolled
+              ? "max-w-none rounded-none border-x-0 border-t-0 border-white/10 bg-brand shadow-md"
+              : "max-w-5xl rounded-full border-border bg-bg-secondary/80 shadow-lg lg:mt-5",
+            isScrolled ? "h-14 px-3 sm:px-5 lg:px-8" : "h-11 px-3 sm:h-12 sm:px-4"
+          )}
+        >
+          <div className="flex h-full items-center justify-between gap-2 sm:gap-3">
+            {/* Brand */}
+            <a
+              href="#home"
+              onClick={(e) => onNavClick(e, "#home")}
+              className="group flex min-w-0 shrink-0 items-center gap-2"
+            >
+              <motion.div
+                whileTap={{ scale: 0.95 }}
+                className={cn(
+                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg shadow-sm sm:h-9 sm:w-9 sm:rounded-xl",
+                  isScrolled
+                    ? "bg-white text-brand"
+                    : "bg-gradient-to-br from-brand to-brand-light text-white"
+                )}
+              >
+                <Image src="/logo.png" alt="Mahin" width={24} height={24} className="h-5 w-5 sm:h-6 sm:w-6 object-contain" />
+              </motion.div>
+              <span
+                className={cn(
+                  "truncate font-heading text-base font-black tracking-tight sm:text-lg",
+                  isScrolled ? "text-white" : "text-heading"
+                )}
+              >
+                Mahin<span className={isScrolled ? "text-white/70" : "text-brand"}>.</span>
+              </span>
             </a>
 
-            {/* Main Links */}
-            <ul className="flex items-center gap-2 relative">
-              {navItems.map((item) => {
-                const isActive = activeSection === item.id;
+            {/* Desktop nav */}
+            <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Primary">
+              {MAIN_LINKS.map(renderDesktopLink)}
 
-                return (
-                  <li
-                    key={item.name}
-                    className="relative z-10 px-4 py-2"
-                    onMouseEnter={() => setHoveredPath(item.href)}
-                    onMouseLeave={() => setHoveredPath(null)}
-                  >
-                    <a
-                      href={item.href}
-                      onClick={(e) => handleNavClick(e, item.href)}
-                      className={`relative z-10 flex items-center gap-2 font-medium text-sm transition-colors duration-300 ${isActive ? "text-brand" : "text-text-primary hover:text-heading"
-                        }`}
-                    >
-                      <i className={`${item.icon} ${isActive ? "text-brand" : "text-text-secondary"}`}></i>
-                      {item.name}
-                    </a>
-
-                    {/* Hover indicator */}
-                    {hoveredPath === item.href && (
-                      <motion.div
-                        layoutId="navHover"
-                        className="absolute inset-0 bg-brand/10 rounded-full -z-10"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                      />
-                    )}
-
-                    {/* Active indicator */}
-                    {isActive && (
-                      <motion.div
-                        layoutId="navActive"
-                        className="absolute -bottom-2 left-1/2 w-1.5 h-1.5 rounded-full bg-brand -translate-x-1/2"
-                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                      />
-                    )}
-                  </li>
-                );
-              })}
-
-              {/* More Dropdown */}
-              <li
-                className="relative z-10 px-4 py-2 cursor-pointer"
-                onMouseEnter={() => setIsMoreHovered(true)}
-                onMouseLeave={() => setIsMoreHovered(false)}
+              <div
+                className="relative"
+                onMouseEnter={() => setMoreHover(true)}
+                onMouseLeave={() => setMoreHover(false)}
               >
-                <div className="flex items-center gap-2 font-medium text-sm text-text-primary hover:text-heading transition-colors">
-                  <i className="fas fa-ellipsis-h text-text-secondary"></i>
-                  More
-                  <i className={`fas fa-chevron-down text-xs transition-transform duration-300 ${isMoreHovered ? "rotate-180 text-brand" : ""}`}></i>
-                </div>
+                <button
+                  type="button"
+                  className={cn(
+                    "relative flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors",
+                    isScrolled
+                      ? isMoreActive
+                        ? "text-white"
+                        : "text-white/80 hover:text-white"
+                      : isMoreActive
+                        ? "text-brand"
+                        : "text-text-secondary hover:text-heading"
+                  )}
+                  aria-expanded={moreHover}
+                  aria-haspopup="menu"
+                >
+                  <Icon
+                    name="more"
+                    size={15}
+                    className={cn(
+                      isScrolled ? (isMoreActive ? "text-white" : "text-white/70") : isMoreActive ? "text-brand" : "text-text-secondary"
+                    )}
+                  />
+                  <span className="relative z-10">More</span>
+                  <Icon
+                    name="chevronDown"
+                    size={14}
+                    className={cn(
+                      "relative z-10 transition-transform duration-200",
+                      moreHover && "rotate-180",
+                      isScrolled ? "text-white/70" : "text-text-secondary"
+                    )}
+                  />
+                  {isMoreActive && (
+                    <motion.span
+                      layoutId="active-nav-pill"
+                      className={cn(
+                        "absolute inset-0 rounded-full",
+                        isScrolled ? "bg-white/20" : "bg-brand/12 dark:bg-brand/20"
+                      )}
+                      transition={{ type: "spring", stiffness: 400, damping: 34 }}
+                    />
+                  )}
+                </button>
 
                 <AnimatePresence>
-                  {isMoreHovered && (
+                  {moreHover && (
                     <motion.div
-                      initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      transition={{ duration: 0.2, ease: "easeOut" }}
-                      className="absolute top-full right-0 pt-4"
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 4 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-[calc(100%+0.5rem)] z-[60] min-w-[13rem]"
                     >
-                      <div className="bg-bg-secondary/95 backdrop-blur-xl border border-border rounded-2xl shadow-2xl p-2 w-56 relative overflow-hidden">
-                        {/* Subtle glow inside dropdown */}
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-brand/10 blur-3xl rounded-full"></div>
-
-                        {moreItems.map((item) => {
-                          const isActive = activeSection === item.id;
+                      <div className="rounded-xl border border-border bg-bg-secondary p-1.5 shadow-xl">
+                        {MORE_LINKS.map((link) => {
+                          const isActive = activeId === link.id;
                           return (
                             <a
-                              key={item.name}
-                              href={item.href}
-                              onClick={(e) => {
-                                handleNavClick(e, item.href);
-                                setIsMoreHovered(false);
-                              }}
-                              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 relative group overflow-hidden ${isActive ? "bg-brand/10 text-brand" : "hover:bg-bg-primary text-text-primary"
-                                }`}
+                              key={link.id}
+                              href={link.href}
+                              onClick={(e) => onNavClick(e, link.href)}
+                              className={cn(
+                                "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                                isActive
+                                  ? "bg-brand/10 text-brand"
+                                  : "text-text-primary hover:bg-bg-primary"
+                              )}
                             >
-                              {/* Hover sweep effect */}
-                              <span className="absolute inset-0 bg-gradient-to-r from-brand/0 via-brand/5 to-brand/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out"></span>
-
-                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isActive ? "bg-brand/20" : "bg-bg-primary group-hover:bg-brand/10"
-                                }`}>
-                                <i className={`${item.icon} ${isActive ? "text-brand" : "text-text-secondary group-hover:text-brand"}`}></i>
-                              </div>
-                              <span className="font-medium text-sm relative z-10">{item.name}</span>
+                              <Icon name={link.icon} size={16} className={isActive ? "text-brand" : "text-text-secondary"} />
+                              {link.label}
                             </a>
                           );
                         })}
@@ -175,109 +308,112 @@ export default function Navbar() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </li>
-            </ul>
+              </div>
+            </nav>
 
             {/* Actions */}
-            <div className="flex items-center gap-3">
-              {mounted && (
-                <button
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  className="w-9 h-9 rounded-full bg-bg-primary border border-border flex items-center justify-center text-text-primary hover:text-brand hover:border-brand transition-all duration-300 hover:rotate-12"
-                  aria-label="Toggle theme"
-                >
-                  <AnimatePresence mode="wait">
-                    <motion.i
-                      key={theme}
-                      initial={{ y: -20, opacity: 0, rotate: -90 }}
-                      animate={{ y: 0, opacity: 1, rotate: 0 }}
-                      exit={{ y: 20, opacity: 0, rotate: 90 }}
-                      transition={{ duration: 0.2 }}
-                      className={`fas ${theme === "dark" ? "fa-sun text-yellow-400" : "fa-moon text-indigo-600"}`}
-                    ></motion.i>
-                  </AnimatePresence>
-                </button>
-              )}
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+              <a
+                href="#contact"
+                onClick={(e) => onNavClick(e, "#contact")}
+                className={cn(
+                  "hidden items-center justify-center rounded-full px-3.5 py-1.5 text-xs font-bold shadow-sm transition-all sm:inline-flex sm:text-sm",
+                  isScrolled
+                    ? "bg-white text-brand hover:bg-white/90"
+                    : "bg-brand text-white hover:bg-brand-dark"
+                )}
+              >
+                Hire me
+              </a>
+
+              <button
+                type="button"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className={cn(
+                  "flex h-8 w-8 items-center justify-center rounded-lg border transition-colors sm:h-9 sm:w-9 sm:rounded-full",
+                  isScrolled
+                    ? "border-white/20 bg-white/10 text-white hover:bg-white/20"
+                    : "border-border bg-bg-primary text-text-primary hover:border-brand/40"
+                )}
+                aria-label="Toggle theme"
+              >
+                <Icon
+                  name={theme === "dark" ? "sun" : "moon"}
+                  size={16}
+                  className={theme === "dark" ? "text-yellow-300" : "text-indigo-500"}
+                />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMenuOpen((o) => !o)}
+                className={cn(
+                  "flex h-8 w-8 items-center justify-center rounded-lg border transition-colors lg:hidden sm:h-9 sm:w-9",
+                  isScrolled
+                    ? "border-white/20 bg-white/10 text-white"
+                    : "border-border bg-bg-primary text-heading"
+                )}
+                aria-label={menuOpen ? "Close menu" : "Open menu"}
+                aria-expanded={menuOpen}
+              >
+                <Icon name={menuOpen ? "x" : "menu"} size={18} />
+              </button>
             </div>
           </div>
-        </div>
-      </nav>
+        </motion.div>
+      </header>
 
-      {/* Mobile Navbar */}
-      <nav className="fixed top-0 w-full z-50 lg:hidden">
-        <div className="bg-bg-secondary/90 backdrop-blur-xl border-b border-border px-5 py-4 flex justify-between items-center">
-          <a href="#home" onClick={(e) => handleNavClick(e, "#home")} className="flex items-center gap-2">
-            <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
-          </a>
-
-          <div className="flex items-center gap-4">
-            {mounted && (
-              <button
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="w-9 h-9 rounded-full bg-bg-primary border border-border flex items-center justify-center text-text-primary"
-              >
-                <i className={`fas ${theme === "dark" ? "fa-sun text-yellow-400" : "fa-moon text-indigo-600"}`}></i>
-              </button>
-            )}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="w-10 h-10 flex flex-col justify-center items-center gap-1.5 bg-brand/10 rounded-lg text-brand"
-            >
-              <motion.span
-                animate={isMobileMenuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
-                className="w-5 h-0.5 bg-current block transition-all"
-              />
-              <motion.span
-                animate={isMobileMenuOpen ? { opacity: 0 } : { opacity: 1 }}
-                className="w-5 h-0.5 bg-current block transition-all"
-              />
-              <motion.span
-                animate={isMobileMenuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
-                className="w-5 h-0.5 bg-current block transition-all"
-              />
-            </button>
-          </div>
-        </div>
-
-        {/* Full Screen Mobile Menu Overlay */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
+      {/* Mobile menu — full panel, no top gap */}
+      <AnimatePresence>
+        {menuOpen && (
+          <>
             <motion.div
-              initial={{ opacity: 0, y: "-100%" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+              onClick={closeMenus}
+              aria-hidden
+            />
+
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: "-100%" }}
-              transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-              className="fixed inset-0 top-[73px] bg-bg-secondary/95 backdrop-blur-2xl border-t border-border z-40 overflow-y-auto"
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className={cn(
+                "fixed inset-x-0 z-50 border-b shadow-xl lg:hidden",
+                isScrolled
+                  ? "top-[calc(env(safe-area-inset-top,0px)+3.5rem)]"
+                  : "top-[calc(env(safe-area-inset-top,0px)+2.75rem)] sm:top-[calc(env(safe-area-inset-top,0px)+3rem)]",
+                isScrolled ? "border-white/10 bg-brand" : "border-border bg-bg-secondary"
+              )}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Navigation menu"
             >
-              <div className="p-6 pb-24 space-y-2">
-                {[...navItems, ...moreItems].map((item, i) => {
-                  const isActive = activeSection === item.id;
-                  return (
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                      key={item.name}
-                    >
-                      <a
-                        href={item.href}
-                        onClick={(e) => handleNavClick(e, item.href)}
-                        className={`flex items-center gap-4 p-4 rounded-2xl transition-colors ${isActive ? "bg-brand/10 border border-brand/20" : "hover:bg-bg-primary border border-transparent"
-                          }`}
-                      >
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isActive ? "bg-brand text-white shadow-lg shadow-brand/30" : "bg-bg-secondary border border-border text-text-secondary"}`}>
-                          <i className={`${item.icon}`}></i>
-                        </div>
-                        <span className={`font-bold text-lg ${isActive ? "text-brand" : "text-heading"}`}>{item.name}</span>
-                      </a>
-                    </motion.div>
-                  );
-                })}
-              </div>
+              <nav className="mx-auto max-h-[calc(100dvh-3.5rem)] max-w-lg overflow-y-auto overscroll-contain px-3 py-3 sm:px-4">
+                <div className="flex flex-col gap-0.5">
+                  {ALL_LINKS.map(renderMobileLink)}
+                </div>
+
+                <a
+                  href="#contact"
+                  onClick={(e) => onNavClick(e, "#contact")}
+                  className={cn(
+                    "mt-3 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold shadow-md active:scale-[0.98]",
+                    isScrolled ? "bg-white text-brand" : "bg-brand text-white"
+                  )}
+                >
+                  <Icon name="mail" size={18} />
+                  Hire me
+                </a>
+              </nav>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }
